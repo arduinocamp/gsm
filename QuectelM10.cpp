@@ -13,17 +13,18 @@ QuectelM10::QuectelM10(){};
 
 QuectelM10::~QuectelM10(){};
   
-int QuectelM10::restart()
+int QuectelM10::restart(char* pin)
 {
   pinMode(RESETPIN, OUTPUT);
   digitalWrite(RESETPIN, HIGH);
   delay(10000);
   digitalWrite(RESETPIN, LOW);
   delay(1000);
-  return 1;
+
+  return configandwait(pin);
 }
 
-int QuectelM10::start()
+int QuectelM10::start(char* pin)
 {
 
   _tf.setTimeout(_TCP_CONNECTION_TOUT_);
@@ -43,8 +44,14 @@ int QuectelM10::start()
   digitalWrite(RESETPIN, LOW);
   delay(1000);
 
+  return configandwait(pin);
+}
+
+int QuectelM10::configandwait(char* pin)
+{
   _tf.setTimeout(_GSM_CONNECTION_TOUT_);
 
+  if(pin) setPIN(pin); //syv
 
   // Try 5 times to register in the network. Note this can take some time!
   for(int i=0; i<10; i++)
@@ -59,6 +66,7 @@ int QuectelM10::start()
       
  	_cell << "AT+CMGF=1" <<  _BYTE(cr) << endl; //SMS text mode.
   	delay(200);
+      // Buah, we should take this to readCall()
 	_cell << "AT+CLIP=1" <<  _BYTE(cr) << endl; //SMS text mode.
   	delay(200);
   	//_cell << "AT+QIDEACT" <<  _BYTE(cr) << endl; //To make sure not pending connection.
@@ -429,7 +437,7 @@ boolean QuectelM10::readSMS(char* msg, int msglength, char* number, int nlength)
   if (getStatus()==IDLE)
     return false;
   
-  _tf.setTimeout(_GSM_DATA_TOUT_);
+  _tf.setTimeout(0);
   _cell.flush();
   _cell << "AT+CMGL=\"REC UNREAD\",1" << endl; 
   if(_tf.find("+CMGL: "))
@@ -486,5 +494,24 @@ boolean QuectelM10::call(char* number, unsigned int milliseconds)
  
 }
 
+int QuectelM10::setPIN(char *pin)
+{
+  //Status = READY or ATTACHED.
+  if((getStatus() != IDLE))
+    return 2;
+      
+  _tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
 
+  _cell.flush();
+
+  //AT command to set PIN.
+  _cell << "AT+CPIN=" << pin <<  _BYTE(cr) << endl; // Establecemos el pin
+  //_cell << "AT+CPIN=6104" << _BYTE(cr) << endl; // Establecemos el pin
+
+  //Expect "OK".
+  if(!_tf.find("OK"))
+    return 0;
+  else  
+    return 1;
+}
 

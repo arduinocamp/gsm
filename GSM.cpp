@@ -10,14 +10,14 @@ GSM::GSM():_cell(_GSM_TXPIN_,_GSM_RXPIN_),_tf(_cell, 10),_status(IDLE)
 };
 
 
-int GSM::begin()
+int GSM::begin(char* pin)
 {
   _cell.begin(9600);
   setStatus(IDLE);
-  return start();
+  return start(pin);
 }
 
-int GSM::restart(){ return 1;}
+int GSM::restart(char* pin){ return 1;}
 
 int GSM::write(uint8_t c)
 {
@@ -35,7 +35,7 @@ int GSM::write(const char* str)
       return 0;
 }
 
-int GSM::start(){return 0;};
+int GSM::start(char* pin){return 0;};
 int GSM::shutdown(){return 0;};
 int GSM::sendSMS(const char* to, const char* msg){return 0;};
 int GSM::attachGPRS(char* domain, char* dom1, char* dom2){return 0;};

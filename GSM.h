@@ -25,9 +25,9 @@ class GSM
   public:
     GSM();
     inline int getStatus(){   return _status; };
-    int begin();
-    virtual int restart();
-    virtual int start();
+    int begin(char* pin=0);
+    virtual int restart(char* pin=0);
+    virtual int start(char* pin=0);
     virtual int shutdown();
     virtual int sendSMS(const char* to, const char* msg);
     virtual boolean availableSMS();
