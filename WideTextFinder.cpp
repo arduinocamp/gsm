@@ -15,8 +15,7 @@
         if (nSerialStream->available() > 0)
 	  {
           r=nSerialStream->read();
-		  if(debug)
-			Serial.print(r);
+          Serial.print(r);
           return r;
         }
       }
@@ -31,12 +30,6 @@
                   nSerialStream(&stream) 
   { 
     this->timeout = timeout * 1000L;     
-	debug=true;
-  }
-  
-  void WideTextFinder::setDebug(boolean d)
-  {
-	debug=d;
   }
 
   // public methods

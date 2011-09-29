@@ -35,16 +35,6 @@ int GSM::write(const char* str)
       return 0;
 }
 
-int GSM::isIP(const char* cadena)
-{
-    int i;
-    for (i=0; i<strlen(cadena); i++)
-        if (!(cadena[i]=='.' || ( cadena[i]>=48 && cadena[i] <=57)))
-            return 0;
-    return 1;
-}
-
-
 int GSM::start(char* pin){return 0;};
 int GSM::shutdown(){return 0;};
 int GSM::sendSMS(const char* to, const char* msg){return 0;};
@@ -61,10 +51,6 @@ boolean GSM::availableSMS(){return false;};
 boolean GSM::readSMS(char* msg, int msglength, char* number, int nlength){return false;};
 boolean GSM::readCall(char* number, int nlength){return false;};
 boolean GSM::call(char* number, unsigned int milliseconds){return false;};
-int GSM::setPIN(char *pin){return 0;};
-int GSM::getCCI(char* cci){return 0;};
-int GSM::getIMEI(char* imei){return 0;};
-
 
 
 
