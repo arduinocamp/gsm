@@ -60,7 +60,7 @@ int QuectelM10::configandwait(char* pin)
     _cell << "AT+CGREG?" <<  _BYTE(cr) << endl; 
 
     //Se espera la unsolicited response de registered to network.
-    if (_tf.find("+CGREG: 0,1")) 
+    if (_tf.find("+CGREG: 0,5"))  // CHANGE!!!!
     {
       setStatus(READY);
       
@@ -182,8 +182,8 @@ int QuectelM10::attachGPRS(char* domain, char* dom1, char* dom2)
   delay(200);	
 
   //Use domain name as the address to stablish a TCP session.
-  //  _cell << "AT+QIDNSIP=1" <<  _BYTE(cr) << endl;
-  _cell << "AT+QIDNSIP=0" <<  _BYTE(cr) << endl;
+   _cell << "AT+QIDNSIP=1" <<  _BYTE(cr) << endl;
+ // _cell << "AT+QIDNSIP=0" <<  _BYTE(cr) << endl;
   
   //Expect "OK". ATTENTION, RETURNS ERROR BUT IT DOES NOT MATTER!!!!
   if(!_tf.find("OK")) ;//return 0;
@@ -210,13 +210,13 @@ int QuectelM10::attachGPRS(char* domain, char* dom1, char* dom2)
   }
   else
   {
-    setStatus(ATTACHED); 
-    delay(1000);
-    return 1;
+    //setStatus(ATTACHED); 
+    //delay(1000);
+    //return 1;
 
     // In this case we dont know the modem mental position
-    //setStatus(ERROR);
-    //return 0;   
+    setStatus(ERROR);
+    return 0;   
   }
 }
 
@@ -392,7 +392,8 @@ int QuectelM10::read(char* result, int resultlength)
   _tf.setTimeout(3);
   // Not well. This way we read whatever comes in one second. If a CLOSED 
   // comes, we have spent a lot of time
-  charget=_tf.getString("","",result, resultlength);
+    charget=_tf.getString("","",result, resultlength);
+
   /*if(strtok(result, "CLOSED")) // whatever chain the Q10 returns...
   {
     // TODO: use strtok to delete from the chain everything from CLOSED
@@ -430,25 +431,22 @@ int QuectelM10::read(char* result, int resultlength)
 
 boolean QuectelM10::availableSMS(){return false;};
 
-boolean QuectelM10::readSMS(char* msg, int msglength, char* number, int nlength)
-{
+// There is still some pending problems
+boolean QuectelM10::readSMS(char* msg, int msglength, char* number, int nlength) {
   int index;
 
   if (getStatus()==IDLE)
     return false;
   
-  _tf.setTimeout(0);
+  _tf.setTimeout(_GSM_DATA_TOUT_);
   _cell.flush();
-  _cell << "AT+CMGL=\"REC UNREAD\",1" << endl; 
+  _cell << "AT+CMGL=\"REC UNREAD\",1" << endl;
   if(_tf.find("+CMGL: "))
   {
-    _tf.getString("", "\"", msg, msglength);
-
     index=_tf.getValue();
-    if(_tf.find("\"+"))
-    {
-       _tf.getString("", "\"", number, nlength);
-    };
+    
+    _tf.getString("READ\",\"", "\"", number, nlength);
+
     if(_tf.find("\n"))
     {	
        _tf.getString("", "\nOK", msg, msglength);
@@ -506,7 +504,6 @@ int QuectelM10::setPIN(char *pin)
 
   //AT command to set PIN.
   _cell << "AT+CPIN=" << pin <<  _BYTE(cr) << endl; // Establecemos el pin
-  //_cell << "AT+CPIN=6104" << _BYTE(cr) << endl; // Establecemos el pin
 
   //Expect "OK".
   if(!_tf.find("OK"))
@@ -515,3 +512,77 @@ int QuectelM10::setPIN(char *pin)
     return 1;
 }
 
+int QuectelM10::write(uint8_t c)
+{
+  if ((getStatus() == TCPCONNECTEDCLIENT) ||(getStatus() == TCPCONNECTEDSERVER) )
+    return write(&c, 1);
+  else
+    return 0;
+}
+
+int QuectelM10::write(const char* str)
+{
+  if ((getStatus() == TCPCONNECTEDCLIENT) ||(getStatus() == TCPCONNECTEDSERVER) )
+      return write((const uint8_t*)str, strlen(str));
+  else
+      return 0;
+}
+
+int QuectelM10::changeNSIPmode(char mode) ///SYVV
+{
+    _tf.setTimeout(_TCP_CONNECTION_TOUT_);
+    
+    //if (getStatus()!=ATTACHED)
+    //    return 0;
+
+    _cell.flush();
+
+    _cell << "AT+QIDNSIP=" << mode <<  _BYTE(cr) << endl;
+
+    if(!_tf.find("OK")) return 0;
+    
+    return 1;
+}
+
+int QuectelM10::getCCI(char *cci)
+{
+  //Status must be READY
+  if((getStatus() != READY))
+    return 2;
+      
+  _tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
+
+  _cell.flush();
+
+  //AT command to get CCID.
+  _cell << "AT+QCCID" << _BYTE(cr) << endl; // Establecemos el pin
+  
+  //Read response from modem
+  _tf.getString("AT+QCCID\r\r\r\n","\r\n",cci, 21);
+  
+  //Expect "OK".
+  if(!_tf.find("OK"))
+    return 0;
+  else  
+    return 1;
+}
+  
+int QuectelM10::getIMEI(char *imei)
+{
+      
+  _tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
+
+  _cell.flush();
+
+  //AT command to get IMEI.
+  _cell << "AT+GSN" << _BYTE(cr) << endl; 
+  
+  //Read response from modem
+  _tf.getString("AT+GSN\r\r\r\n","\r\n",imei, 15);
+  
+  //Expect "OK".
+  if(!_tf.find("OK"))
+    return 0;
+  else  
+    return 1;
+}

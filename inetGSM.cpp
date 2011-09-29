@@ -3,7 +3,6 @@
 
 int InetGSM::httpGET(const char* server, int port, const char* path, char* result, int resultlength)
 {
-  char itoaBuffer[8];
   int length_write;
 
   
@@ -38,21 +37,21 @@ int InetGSM::httpPOST(const char* server, int port, const char* path, const char
     return 0;
 
   
-  strcpy(postbuffer,"POST ");
-  strcat(postbuffer,path);
-  strcat(postbuffer," HTTP/1.0\nHost: ");
-  strcat(postbuffer,server);
-  //  strcat(postbuffer,"\n\rUser-Agent: Mozilla/4.0\n\rContent-Length: ");
-  strcat(postbuffer,"\nContent-Length: ");
+  strcpy(_buffer,"POST ");
+  strcat(_buffer,path);
+  strcat(_buffer," HTTP/1.0\nHost: ");
+  strcat(_buffer,server);
+  //  strcat(_buffer,"\n\rUser-Agent: Mozilla/4.0\n\rContent-Length: ");
+  strcat(_buffer,"\nContent-Length: ");
   itoa(strlen(parameters),itoaBuffer,10);  
-  strcat(postbuffer,itoaBuffer);
-  strcat(postbuffer,"\n\n");
-  strcat(postbuffer,parameters);
-  strcat(postbuffer,"\n\n");
+  strcat(_buffer,itoaBuffer);
+  strcat(_buffer,"\n\n");
+  strcat(_buffer,parameters);
+  strcat(_buffer,"\n\n");
   
   
   
-  gsm.write((const uint8_t*)postbuffer, strlen(postbuffer));
+  gsm.write((const uint8_t*)_buffer, strlen(_buffer));
 
 
 //  int res= gsm.read(result, resultlength);
@@ -66,10 +65,45 @@ int InetGSM::tweet(const char* token, const char* msg)
 {
   //    gsm.httpPOST("arduino-tweet.appspot.com",80,"/update", "token=15514242-eWYAlMwjRQfrhnZxQiOfDXUpaYwjbSvMl1Nm5Qyg&status=Spam", buffer, 200);
 
-  strcpy(tweetbuffer,"token=");
-  strcat(tweetbuffer,token);
-  strcat(tweetbuffer,"&status=");
-  strcat(tweetbuffer, msg);
-  httpPOST("arduino-tweet.appspot.com",80,"/update",tweetbuffer, tweetbuffer, BUFFERSIZE);
+  strcpy(_buffer,"token=");
+  strcat(_buffer,token);
+  strcat(_buffer,"&status=");
+  strcat(_buffer, msg);
+  httpPOST("arduino-tweet.appspot.com",80,"/update",_buffer, _buffer, BUFFERSIZE);
 }
 
+int InetGSM::openmail(char* server, char* loginbase64, char* passbase64, char* from, char* to, char* subj)
+{
+	  if (!gsm.connectTCP(server, 25))
+    	return 0;
+    
+    delay(1000);
+    gsm.read(_buffer, BUFFERSIZE);    
+    gsm.write("HELO\n");
+    delay(500);
+    gsm.read(_buffer, BUFFERSIZE);
+    gsm.write("AUTH LOGIN\n");
+    delay(500);
+    gsm.read(_buffer, BUFFERSIZE);
+    gsm.write(loginbase64);gsm.write("\n");
+    delay(500);
+    gsm.read(_buffer, BUFFERSIZE);
+    gsm.write(passbase64);gsm.write("\n");
+    delay(500);
+    gsm.read(_buffer, BUFFERSIZE);
+    gsm.write("MAIL FROM: ");gsm.write(from);gsm.write("\n");
+    delay(500);
+    gsm.read(_buffer, BUFFERSIZE);
+    gsm.write("RCPT TO: ");gsm.write(to);gsm.write("\n");
+    delay(500);
+    gsm.read(_buffer, BUFFERSIZE);
+    gsm.write("Subject: ");gsm.write(subj);gsm.write("\n\n");
+    return 1;
+}
+int InetGSM::closemail()
+{
+	gsm.write("\n.\n");
+	gsm.disconnectTCP();
+	return 1;
+}
+ 

@@ -8,6 +8,8 @@ class QuectelM10 : public virtual GSM
 
   private:
     int configandwait(char* pin);
+    int setPIN(char *pin);
+    int changeNSIPmode(char);
 
   public:
     QuectelM10();
@@ -15,6 +17,9 @@ class QuectelM10 : public virtual GSM
     int start(char* pin=0);
     int restart(char* pin=0);
     int shutdown();
+    int getCCI(char* cci);
+		int getIMEI(char* imei);
+
     int sendSMS(const char* to, const char* msg);
     int attachGPRS(char* domain, char* dom1, char* dom2);
     boolean availableSMS();
@@ -27,9 +32,12 @@ class QuectelM10 : public virtual GSM
     int connectTCPServer(int port);
     boolean connectedClient();
     int write(const uint8_t* buffer, size_t sz);
+		int write(uint8_t c);
+    int write(const char* str);
+
     int read(char* result, int resultlength);
     int readCellData(int &mcc, int &mnc, long &lac, long &cellid);
-    int setPIN(char *pin);
+  
 };
 
 extern QuectelM10 gsm;
