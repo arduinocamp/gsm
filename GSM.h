@@ -21,6 +21,8 @@ class GSM
     NewSoftSerial _cell;
     WideTextFinder _tf;
     inline void setStatus(GSM_st_e status) { _status = status; }
+    virtual int setPIN(char *pin);
+    int isIP(const char* cadena);
 
   public:
     GSM();
@@ -29,6 +31,9 @@ class GSM
     virtual int restart(char* pin=0);
     virtual int start(char* pin=0);
     virtual int shutdown();
+    virtual int getCCI(char* cci);
+    virtual int getIMEI(char* imei);
+
     virtual int sendSMS(const char* to, const char* msg);
     virtual boolean availableSMS();
     virtual boolean readSMS(char* msg, int msglength, char* number, int nlength);
@@ -41,10 +46,11 @@ class GSM
     virtual int connectTCPServer(int port);
     virtual boolean connectedClient();
     virtual int readCellData(int &mcc, int &mnc, long &lac, long &cellid);
-    int write(uint8_t c);
-    int write(const char* str);
+    virtual int write(uint8_t c);
+    virtual int write(const char* str);
     virtual int write(const uint8_t* buffer, size_t sz);
     virtual int read(char* result, int resultlength);
+    
 
 };
 

@@ -11,6 +11,7 @@ private:
 
   unsigned long timeout;    // number of seconds to wait for the next char before aborting read
   unsigned long startMillis; // used for timeout measurement
+  boolean debug;
 
   char read();             // private function to read from the stream 
 
@@ -18,6 +19,9 @@ public:
   // constructor: 
   // default timeout is 5 seconds
   WideTextFinder(NewSoftSerial &stream, int timeout = 5);          // Ethernet constructor
+  
+  // Manage debug
+  void setDebug(boolean d);
 
   // find methods - these seek through the data but do not return anything
   // they are useful to skip past unwanted data  
