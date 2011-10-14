@@ -64,6 +64,7 @@ boolean GSM::call(char* number, unsigned int milliseconds){return false;};
 int GSM::setPIN(char *pin){return 0;};
 int GSM::getCCI(char* cci){return 0;};
 int GSM::getIMEI(char* imei){return 0;};
+uint8_t GSM::read(){return 0;};
 
 
 

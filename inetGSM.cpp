@@ -64,12 +64,12 @@ int InetGSM::httpPOST(const char* server, int port, const char* path, const char
 int InetGSM::tweet(const char* token, const char* msg)
 {
   //    gsm.httpPOST("arduino-tweet.appspot.com",80,"/update", "token=15514242-eWYAlMwjRQfrhnZxQiOfDXUpaYwjbSvMl1Nm5Qyg&status=Spam", buffer, 200);
-
-  strcpy(_buffer,"token=");
-  strcat(_buffer,token);
-  strcat(_buffer,"&status=");
-  strcat(_buffer, msg);
-  httpPOST("arduino-tweet.appspot.com",80,"/update",_buffer, _buffer, BUFFERSIZE);
+  char shortbuf[200];
+  strcpy(shortbuf,"token=");
+  strcat(shortbuf,token);
+  strcat(shortbuf,"&status=");
+  strcat(shortbuf, msg);
+  httpPOST("arduino-tweet.appspot.com",80,"/update",shortbuf, shortbuf, BUFFERSIZE);
 }
 
 int InetGSM::openmail(char* server, char* loginbase64, char* passbase64, char* from, char* to, char* subj)

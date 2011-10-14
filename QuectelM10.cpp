@@ -49,34 +49,36 @@ int QuectelM10::start(char* pin)
 
 int QuectelM10::configandwait(char* pin)
 {
+  int connCode;
   _tf.setTimeout(_GSM_CONNECTION_TOUT_);
 
   if(pin) setPIN(pin); //syv
 
-  // Try 5 times to register in the network. Note this can take some time!
+  // Try 10 times to register in the network. Note this can take some time!
   for(int i=0; i<10; i++)
   {  	
     //Ask for register status to GPRS network.
     _cell << "AT+CGREG?" <<  _BYTE(cr) << endl; 
 
     //Se espera la unsolicited response de registered to network.
-    if (_tf.find("+CGREG: 0,5"))  // CHANGE!!!!
-    {
-      setStatus(READY);
-      
- 	_cell << "AT+CMGF=1" <<  _BYTE(cr) << endl; //SMS text mode.
-  	delay(200);
-      // Buah, we should take this to readCall()
-	_cell << "AT+CLIP=1" <<  _BYTE(cr) << endl; //SMS text mode.
-  	delay(200);
-  	//_cell << "AT+QIDEACT" <<  _BYTE(cr) << endl; //To make sure not pending connection.
-  	//delay(1000);
-  
-      return 1;
-    }
-    //Attach GPRS service.
-    //_cell << "AT+CGATT=1" <<  _BYTE(cr) << endl; 
-    //delay(500);
+    while (_tf.find("+CGREG: 0,"))  // CHANGE!!!!
+	{
+		connCode=_tf.getValue();
+		if((connCode==1)||(connCode==5))
+		{
+		  setStatus(READY);
+		  
+		_cell << "AT+CMGF=1" <<  _BYTE(cr) << endl; //SMS text mode.
+		delay(200);
+		  // Buah, we should take this to readCall()
+		_cell << "AT+CLIP=1" <<  _BYTE(cr) << endl; //SMS text mode.
+		delay(200);
+		//_cell << "AT+QIDEACT" <<  _BYTE(cr) << endl; //To make sure not pending connection.
+		//delay(1000);
+	  
+		  return 1;
+		}
+	}
   }
   return 0;
 }
@@ -384,6 +386,7 @@ int QuectelM10::write(const uint8_t* buffer, size_t sz)
   return sz;  
 }
 
+
 int QuectelM10::read(char* result, int resultlength)
 {
   // Or maybe do it with AT+QIRD
@@ -581,4 +584,9 @@ int QuectelM10::getIMEI(char *imei)
     return 0;
   else  
     return 1;
+}
+
+uint8_t QuectelM10::read()
+{
+  return _cell.read();
 }

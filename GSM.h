@@ -50,6 +50,7 @@ class GSM
     virtual int write(const char* str);
     virtual int write(const uint8_t* buffer, size_t sz);
     virtual int read(char* result, int resultlength);
+	virtual uint8_t read();
     
 
 };

@@ -18,7 +18,7 @@ class QuectelM10 : public virtual GSM
     int restart(char* pin=0);
     int shutdown();
     int getCCI(char* cci);
-		int getIMEI(char* imei);
+	int getIMEI(char* imei);
 
     int sendSMS(const char* to, const char* msg);
     int attachGPRS(char* domain, char* dom1, char* dom2);
@@ -31,10 +31,11 @@ class QuectelM10 : public virtual GSM
     int connectTCPServer(int port);
     boolean connectedClient();
     int write(const uint8_t* buffer, size_t sz);
-		int write(uint8_t c);
+	int write(uint8_t c);
     int write(const char* str);
-
+	
     int read(char* result, int resultlength);
+	uint8_t read();
     int readCellData(int &mcc, int &mnc, long &lac, long &cellid);
   
 };
